@@ -67,32 +67,35 @@ void DependencyChecker::checkForReadDependence(unsigned int reg)
    * the appropriate RegisterInfo entry regardless of dependence detection.
    */
 { //check for the read dependence occur when reg is read
-   list<Instruction>::const_iterator it;
+   list<Instruction>::iterator it;
    for(it = myInstructions.begin(); it !=  myInstructions.end(); it++){
       if((*it).getInstType() == RTYPE){
-         if(reg == it->getRD())
-		addDependEntry(reg,RAW);
-      } else if(it.getInstType() == ITYPE){
-	if(reg == it.getRT())
-	        addDependEntry(reg,RAW);	
+         if(reg == (*it).getRD())
+		        addDependEntry(reg,RAW);
+      } else if((*it).getInstType() == ITYPE){
+	         if(reg == (*it).getRT()) {
+	           addDependEntry(reg,RAW);	
+           }
       }
 }
    //update the RegisterInfo entry              
-     r.lastInstructionToAccess = reg;             
-     r.accessType = WRITE;  
+     myCurrentState[reg].lastInstructionToAccess = reg;             
+     myCurrentState[reg].accessType = WRITE;  
 }
 
 void DependencyChecker::addDependEntry(unsigned int reg, DependenceType type)
 {// iterate the list of registers that dependence involoved
-  struct Dependence myDep{
+  Dependence myDep;
   myDep.dependenceType = type;
   myDep.registerNumber = reg;
-  myDep.previousInstructionNumber = myDependences.currentInstructionNumber;
-  myDep.currentInstructionNumber = myDependences.currentInstructionNumber + 1;
-  };
-  for(int i = 0; i < myDependences.size(); i++){
-    if(myDep.registerNumber == (myDependences.get(i)).registerNumber)
-    myDependences.push_back(myDep);
+  myDep.previousInstructionNumber = myDep.currentInstructionNumber;
+  myDep.currentInstructionNumber = myDep.currentInstructionNumber + 1;
+  
+  list<Dependence>::iterator it;
+   for(it = myDependences.begin(); it != myDependences.end(); it++){
+      if(myDep.registerNumber == (*it).registerNumber) {
+        myDependences.push_back(myDep);
+    }
   }
 }
 
@@ -104,24 +107,28 @@ void DependencyChecker::checkForWriteDependence(unsigned int reg)
    * the appropriate RegisterInfo entry regardless of dependence detection.
    */
 {
-   list<Instruction>::const_iterator it;
+   list<Instruction>::iterator it;
    for(it = myInstructions.begin(); it !=  myInstructions.end(); it++){
-      if(it.getInstType() == RTYPE){
-         if(reg == it.getRD())
+      if((*it).getInstType() == RTYPE){
+         if(reg == (*it).getRD()){
                 addDependEntry(reg,WAW);
-	 if(reg == it.getRS() || reg == it.getRT())
-		addDependEntry(reg,WAR);
+          }
+         if(reg == (*it).getRS() || reg == (*it).getRT()) {
+		        addDependEntry(reg,WAR);
+         }
 
-      } else if(it.getInstType() == ITYPE){
-        if(reg == it.getRT())
+      } else if((*it).getInstType() == ITYPE){
+        if(reg == (*it).getRT()){
                 addDependEntry(reg,WAW);
-	if(reg == it.getRS())
-		addDependEntry(reg,WAR);
+        }
+	      if(reg == (*it).getRS()) {
+		            addDependEntry(reg,WAR);
         }
     }
 
-    r.lastInstructionToAccess = reg;
-    r.accessType = WRITE;
+    myCurrentState[reg].lastInstructionToAccess = reg;
+    myCurrentState[reg].accessType = WRITE;
+  }
 }
 
 void DependencyChecker::printDependences()
