@@ -91,12 +91,12 @@ void DependencyChecker::addDependEntry(unsigned int reg, DependenceType type)
   myDep.previousInstructionNumber = myDep.currentInstructionNumber;
   myDep.currentInstructionNumber = myDep.currentInstructionNumber + 1;
   
-  list<Dependence>::iterator it;
-   for(it = myDependences.begin(); it != myDependences.end(); it++){
-      if(myDep.registerNumber == (*it).registerNumber) {
+ // list<Dependence>::iterator it;
+  // for(it = myDependences.begin(); it != myDependences.end(); it++){
+  //    if(myDep.registerNumber == (*it).registerNumber) {
         myDependences.push_back(myDep);
-    }
-  }
+  //  }
+  //}
 }
 
 
@@ -110,10 +110,10 @@ void DependencyChecker::checkForWriteDependence(unsigned int reg)
    list<Instruction>::iterator it;
    for(it = myInstructions.begin(); it !=  myInstructions.end(); it++){
       if((*it).getInstType() == RTYPE){
-         if(reg == (*it).getRD()){
+         if((int)reg == (*it).getRD()){
                 addDependEntry(reg,WAW);
           }
-         if(reg == (*it).getRS() || reg == (*it).getRT()) {
+         if((int)reg == (*it).getRS() ||(int)reg == (*it).getRT()) {
 		        addDependEntry(reg,WAR);
          }
 
