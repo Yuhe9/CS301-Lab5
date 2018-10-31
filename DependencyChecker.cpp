@@ -21,7 +21,7 @@ void DependencyChecker::addInstruction(Instruction i)
  */
 {
   InstType iType = i.getInstType();
-  register rs, rt, rd;
+  unsigned int  rs, rt, rd;
   rs = rt = rd = -1;
   
   switch(iType){
@@ -40,7 +40,7 @@ void DependencyChecker::addInstruction(Instruction i)
   case ITYPE:
     rs = i.getRS();
     rt = i.getRT();
-    if(i.getImmLabel()){
+    if(i.getImmediate() != -1){
       checkForReadDependence(rs);
       checkForReadDependence(rt);
     } else{
@@ -66,24 +66,36 @@ void DependencyChecker::checkForReadDependence(unsigned int reg)
    * instruction.  If so, adds an entry to the list of dependences. Also updates
    * the appropriate RegisterInfo entry regardless of dependence detection.
    */
-{
-  // iterate the list of registers that dependence involoved
-  struct Dependence myDep;
-  myDep.dependenceType = RAW;
-  myDep.registerNumber = reg;
-  myDep.previousInstructionNumber = myDependence.currentInstructionNumber;
-  myDep.currentInstructionNumber = myDependence.currentInstructionNumber + 1;
-
-  for(int i = 0; i < myDependence.size(); i++{
-    if(myDep.registerNumber == (myDependence.get(i)).registerNumber)
-    myDependence.push_back(myDep);
-
-  }
-
-  //update the RegisterInfo entry
-  r.lastInstructionToAccess = reg;
-  r.accessType = WRITE;   
+{ //check for the read dependence occur when reg is read
+   list<Instruction>::const_iterator it;
+   for(it = myInstructions.begin(); it !=  myInstructions.end(); it++){
+      if((*it).getInstType() == RTYPE){
+         if(reg == it->getRD())
+		addDependEntry(reg,RAW);
+      } else if(it.getInstType() == ITYPE){
+	if(reg == it.getRT())
+	        addDependEntry(reg,RAW);	
+      }
 }
+   //update the RegisterInfo entry              
+     r.lastInstructionToAccess = reg;             
+     r.accessType = WRITE;  
+}
+
+void DependencyChecker::addDependEntry(unsigned int reg, DependenceType type)
+{// iterate the list of registers that dependence involoved
+  struct Dependence myDep{
+  myDep.dependenceType = type;
+  myDep.registerNumber = reg;
+  myDep.previousInstructionNumber = myDependences.currentInstructionNumber;
+  myDep.currentInstructionNumber = myDependences.currentInstructionNumber + 1;
+  };
+  for(int i = 0; i < myDependences.size(); i++){
+    if(myDep.registerNumber == (myDependences.get(i)).registerNumber)
+    myDependences.push_back(myDep);
+  }
+}
+
 
 
 void DependencyChecker::checkForWriteDependence(unsigned int reg)
@@ -92,11 +104,25 @@ void DependencyChecker::checkForWriteDependence(unsigned int reg)
    * the appropriate RegisterInfo entry regardless of dependence detection.
    */
 {
-  
-  // Your code here
+   list<Instruction>::const_iterator it;
+   for(it = myInstructions.begin(); it !=  myInstructions.end(); it++){
+      if(it.getInstType() == RTYPE){
+         if(reg == it.getRD())
+                addDependEntry(reg,WAW);
+	 if(reg == it.getRS() || reg == it.getRT())
+		addDependEntry(reg,WAR);
 
+      } else if(it.getInstType() == ITYPE){
+        if(reg == it.getRT())
+                addDependEntry(reg,WAW);
+	if(reg == it.getRS())
+		addDependEntry(reg,WAR);
+        }
+    }
+
+    r.lastInstructionToAccess = reg;
+    r.accessType = WRITE;
 }
-
 
 void DependencyChecker::printDependences()
   /* Prints out the sequence of instructions followed by the sequence of data

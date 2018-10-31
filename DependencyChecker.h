@@ -94,6 +94,8 @@ class DependencyChecker {
    * the appropriate RegisterInfo entry regardless of dependence detection.
    */
   void checkForWriteDependence(unsigned int reg);
+// add comment
+  void addDependEntry(unsigned int reg, DependenceType type);
 
   map<unsigned int, RegisterInfo> myCurrentState;
   list<Dependence> myDependences;
