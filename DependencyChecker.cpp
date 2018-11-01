@@ -70,10 +70,10 @@ void DependencyChecker::checkForReadDependence(unsigned int reg)
    list<Instruction>::iterator it;
    for(it = myInstructions.begin(); it !=  myInstructions.end(); it++){
       if((*it).getInstType() == RTYPE){
-         if(reg == (*it).getRD())
+         if((int)reg == (*it).getRD())
 		        addDependEntry(reg,RAW);
       } else if((*it).getInstType() == ITYPE){
-	         if(reg == (*it).getRT()) {
+	         if((int)reg == (*it).getRT()) {
 	           addDependEntry(reg,RAW);	
            }
       }
@@ -110,18 +110,18 @@ void DependencyChecker::checkForWriteDependence(unsigned int reg)
    list<Instruction>::iterator it;
    for(it = myInstructions.begin(); it !=  myInstructions.end(); it++){
       if((*it).getInstType() == RTYPE){
-         if(reg == (*it).getRD()){
+         if((int)reg == (*it).getRD()){
                 addDependEntry(reg,WAW);
           }
-         if(reg == (*it).getRS() || reg == (*it).getRT()) {
+         if((int)reg == (*it).getRS() || (int)reg == (*it).getRT()) {
 		        addDependEntry(reg,WAR);
          }
 
       } else if((*it).getInstType() == ITYPE){
-        if(reg == (*it).getRT()){
+        if((int)reg == (*it).getRT()){
                 addDependEntry(reg,WAW);
         }
-	      if(reg == (*it).getRS()) {
+	      if((int)reg == (*it).getRS()) {
 		            addDependEntry(reg,WAR);
         }
     }
