@@ -92,7 +92,6 @@ void DependencyChecker::addDependEntry(unsigned int reg, DependenceType type)
     dep.currentInstructionNumber = myInstructions.size() ;
     myDependences.push_back(dep);
 
-       
 }
 
 
