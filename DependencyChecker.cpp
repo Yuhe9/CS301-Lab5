@@ -23,7 +23,7 @@ void DependencyChecker::addInstruction(Instruction i)
   InstType iType = i.getInstType();
   unsigned int  rs, rt, rd;
   rs = rt = rd = -1;
-  
+  Opcode o = i.getOpcode();
   switch(iType){
   
   case RTYPE:
@@ -31,9 +31,12 @@ void DependencyChecker::addInstruction(Instruction i)
     rt = i.getRT();
     rd = i.getRD();
     
-    checkForReadDependence(rs);
-    checkForReadDependence(rt);
-    checkForWriteDependence(rd);
+    if(myOpcodeTable.RSposition(o) != -1)    
+        checkForReadDependence(rs);
+    if(myOpcodeTable.RTposition(o) != -1)
+        checkForReadDependence(rt);
+    if(myOpcodeTable.RDposition(o) != -1)    
+        checkForWriteDependence(rd);
 
     break;
 
@@ -68,8 +71,11 @@ void DependencyChecker::checkForReadDependence(unsigned int reg)
    */
 { //check for the read dependence occur when reg is read
    list<Instruction>::iterator it;
+   int i = myInstructions.size(); // current instruction number   
+
    for(it = myInstructions.begin(); it !=  myInstructions.end(); it++){
       if((*it).getInstType() == RTYPE){
+
          if((int)reg == (*it).getRD())
 		        addDependEntry(reg,RAW);
       } else if((*it).getInstType() == ITYPE){
@@ -77,26 +83,27 @@ void DependencyChecker::checkForReadDependence(unsigned int reg)
 	           addDependEntry(reg,RAW);	
            }
       }
-}
+    }
    //update the RegisterInfo entry              
-     myCurrentState[reg].lastInstructionToAccess = reg;             
-     myCurrentState[reg].accessType = WRITE;  
-}
+   RegisterInfo re;
+   re.lastInstructionToAccess = i;
+   re.accessType = READ;
+   myCurrentState.at(reg) = re;
+ }     
+       
+
 
 void DependencyChecker::addDependEntry(unsigned int reg, DependenceType type)
 {// iterate the list of registers that dependence involoved
-  Dependence myDep;
-  myDep.dependenceType = type;
-  myDep.registerNumber = reg;
-  myDep.previousInstructionNumber = myDep.currentInstructionNumber;
-  myDep.currentInstructionNumber = myDep.currentInstructionNumber + 1;
-  
-  list<Dependence>::iterator it;
-   for(it = myDependences.begin(); it != myDependences.end(); it++){
-      if(myDep.registerNumber == (*it).registerNumber) {
-        myDependences.push_back(myDep);
-    }
-  }
+    Dependence dep;
+    dep.dependenceType = type;
+    dep.registerNumber = reg;
+    dep.previousInstructionNumber = myCurrentState.at(reg).lastInstructionToAccess;// what this should be?
+    dep.currentInstructionNumber = myInstructions.size() ;
+    cout << "previous instruction num" << myCurrentState.at(reg).lastInstructionToAccess << endl; 
+    cout << "crrent instrunction num " << myInstructions.size()  << endl;
+    myDependences.push_back(dep);
+  //}
 }
 
 
@@ -108,6 +115,8 @@ void DependencyChecker::checkForWriteDependence(unsigned int reg)
    */
 {
    list<Instruction>::iterator it;
+   int i = myInstructions.size();
+   
    for(it = myInstructions.begin(); it !=  myInstructions.end(); it++){
       if((*it).getInstType() == RTYPE){
          if((int)reg == (*it).getRD()){
@@ -115,6 +124,8 @@ void DependencyChecker::checkForWriteDependence(unsigned int reg)
           }
          if((int)reg == (*it).getRS() || (int)reg == (*it).getRT()) {
 		        addDependEntry(reg,WAR);
+         else if((int)reg == (*it).getRS() ||(int)reg == (*it).getRT()) {
+	        addDependEntry(reg,WAR);
          }
 
       } else if((*it).getInstType() == ITYPE){
@@ -128,8 +139,19 @@ void DependencyChecker::checkForWriteDependence(unsigned int reg)
 
     myCurrentState[reg].lastInstructionToAccess = reg;
     myCurrentState[reg].accessType = WRITE;
+	else if(reg == (*it).getRS()) {
+	        addDependEntry(reg,WAR);
+	}  
+      }
+   }
+   
+    RegisterInfo re;
+    re.lastInstructionToAccess = i;
+    re.accessType = WRITE;
+    myCurrentState.at(reg) = re;
+    cout << "myCurrentState at(reg): " << myCurrentState.at(reg).lastInstructionToAccess << endl; 
+  
   }
-}
 
 void DependencyChecker::printDependences()
   /* Prints out the sequence of instructions followed by the sequence of data
