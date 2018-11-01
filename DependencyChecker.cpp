@@ -75,12 +75,11 @@ void DependencyChecker::checkForReadDependence(unsigned int reg)
 
    for(it = myInstructions.begin(); it !=  myInstructions.end(); it++){
       if((*it).getInstType() == RTYPE){
-
          if((int)reg == (*it).getRD())
-		        addDependEntry(reg,RAW);
+    addDependEntry(reg,RAW);
       } else if((*it).getInstType() == ITYPE){
-	         if((int)reg == (*it).getRT()) {
-	           addDependEntry(reg,RAW);	
+           if((int)reg == (*it).getRT()) {
+             addDependEntry(reg,RAW); 
            }
       }
     }
@@ -122,26 +121,17 @@ void DependencyChecker::checkForWriteDependence(unsigned int reg)
          if((int)reg == (*it).getRD()){
                 addDependEntry(reg,WAW);
           }
-         if((int)reg == (*it).getRS() || (int)reg == (*it).getRT()) {
-		        addDependEntry(reg,WAR);
          else if((int)reg == (*it).getRS() ||(int)reg == (*it).getRT()) {
-	        addDependEntry(reg,WAR);
+          addDependEntry(reg,WAR);
          }
 
       } else if((*it).getInstType() == ITYPE){
         if((int)reg == (*it).getRT()){
                 addDependEntry(reg,WAW);
         }
-	      if((int)reg == (*it).getRS()) {
-		            addDependEntry(reg,WAR);
-        }
-    }
-
-    myCurrentState[reg].lastInstructionToAccess = reg;
-    myCurrentState[reg].accessType = WRITE;
-	else if(reg == (*it).getRS()) {
-	        addDependEntry(reg,WAR);
-	}  
+  else if((int)reg == (*it).getRS()) {
+          addDependEntry(reg,WAR);
+  }  
       }
    }
    
