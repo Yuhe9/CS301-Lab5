@@ -99,10 +99,46 @@ void DependencyChecker::addDependEntry(unsigned int reg, DependenceType type)
     dep.registerNumber = reg;
     dep.previousInstructionNumber = myCurrentState.at(reg).lastInstructionToAccess;// what this should be?
     dep.currentInstructionNumber = myInstructions.size() ;
-    cout << "previous instruction num" << myCurrentState.at(reg).lastInstructionToAccess << endl; 
-    cout << "crrent instrunction num " << myInstructions.size()  << endl;
-    myDependences.push_back(dep);
-  //}
+
+
+      cout << "**********" << endl;
+      Dependence previous = myDependences.back();
+
+
+      /*cout << previous.registerNumber << endl;
+      cout << previous.previousInstructionNumber << endl;
+      cout << previous.currentInstructionNumber << endl;
+      cout << previous.dependenceType << endl;
+
+      cout << "**********" << endl;
+
+      cout << dep.registerNumber << endl;
+      cout << dep.previousInstructionNumber << endl;
+      cout << dep.currentInstructionNumber << endl;
+      cout << dep.dependenceType << endl;*/
+
+
+      if((previous.dependenceType != dep.dependenceType) || (previous.previousInstructionNumber != dep.previousInstructionNumber) || (previous.currentInstructionNumber != dep.currentInstructionNumber) || (previous.registerNumber != dep.registerNumber)){
+
+          myDependences.push_back(dep);
+      }
+      else {
+      cout << previous.registerNumber << endl;
+      cout << previous.previousInstructionNumber << endl;
+      cout << previous.currentInstructionNumber << endl;
+      cout << previous.dependenceType << endl;
+
+      cout << "**********" << endl;
+
+      cout << dep.registerNumber << endl;
+      cout << dep.previousInstructionNumber << endl;
+      cout << dep.currentInstructionNumber << endl;
+      cout << dep.dependenceType << endl;
+      }
+
+    //myDependences.push_back(dep);
+
+
 }
 
 
