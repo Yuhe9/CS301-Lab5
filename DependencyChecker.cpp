@@ -27,10 +27,12 @@ void DependencyChecker::addInstruction(Instruction i)
   switch(iType){
   
   case RTYPE:
+    // get register fields for the R-type instruction
     rs = i.getRS();
     rt = i.getRT();
     rd = i.getRD();
     
+    // check if the R-type instruction has registers rs, rd, rt    
     if(myOpcodeTable.RSposition(o) != -1) {   
         checkForReadDependence(rs);
     }
@@ -42,10 +44,12 @@ void DependencyChecker::addInstruction(Instruction i)
     }
 
     break;
-
+  //get register fields for the I-type instruction
   case ITYPE:
     rs = i.getRS();
     rt = i.getRT();
+
+    //check if the I-type instruction contains an immediate field
     if(i.getImmediate() != -1){
         checkForReadDependence(rs);
         checkForWriteDependence(rt);
@@ -53,12 +57,12 @@ void DependencyChecker::addInstruction(Instruction i)
     break;
 
   case JTYPE:
-    break;
+    break;//J type instructions do not have registers
   default:
     // do nothing
     break;
   }
-
+  // add the instruction to the list
   myInstructions.push_back(i);
 
 }
@@ -69,10 +73,12 @@ void DependencyChecker::checkForReadDependence(unsigned int reg)
    * the appropriate RegisterInfo entry regardless of dependence detection.
    */
 { 
+   // check if the register is valid
    if(reg >= 0 && reg < NumRegisters){
-       int i = myInstructions.size();               
-	     if(myCurrentState[reg].accessType == WRITE) {
-                 addDependEntry(reg, RAW);
+       int i = myInstructions.size();
+           // check for the previous access type to determine if it is a RAW dependence               
+	   if(myCurrentState[reg].accessType == WRITE) {
+                addDependEntry(reg, RAW);
        }
    
    //update the RegisterInfo entry              
@@ -86,7 +92,8 @@ void DependencyChecker::checkForReadDependence(unsigned int reg)
 
 void DependencyChecker::addDependEntry(unsigned int reg, DependenceType type)
 //helper method to add an entry to the list of dependences
-{
+{   
+    // constructe a dependency entry and add it into list of dependences
     Dependence dep;
     dep.dependenceType = type;
     dep.registerNumber = reg;
@@ -103,8 +110,10 @@ void DependencyChecker::checkForWriteDependence(unsigned int reg)
    * the appropriate RegisterInfo entry regardless of dependence detection.
    */
 {
+   // check if the register is valid
    if(reg >= 0 && reg < NumRegisters){
       int i = myInstructions.size();
+      //check for the previous access type to determine if it is a WAW or WAR dependency
       if(myCurrentState[reg].accessType == WRITE) {
          addDependEntry(reg,WAW);
       }
@@ -112,6 +121,7 @@ void DependencyChecker::checkForWriteDependence(unsigned int reg)
          addDependEntry(reg,WAR);
       }
    
+      //update the RegisterInfo entry
       RegisterInfo updateInfo;
       updateInfo.lastInstructionToAccess = i;
       updateInfo.accessType = WRITE;
