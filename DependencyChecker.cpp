@@ -31,12 +31,15 @@ void DependencyChecker::addInstruction(Instruction i)
     rt = i.getRT();
     rd = i.getRD();
     
-    if(myOpcodeTable.RSposition(o) != -1)    
+    if(myOpcodeTable.RSposition(o) != -1) {   
         checkForReadDependence(rs);
-    if(myOpcodeTable.RTposition(o) != -1)
+    }
+    if(myOpcodeTable.RTposition(o) != -1) {
         checkForReadDependence(rt);
-    if(myOpcodeTable.RDposition(o) != -1)    
+    }
+    if(myOpcodeTable.RDposition(o) != -1) { 
         checkForWriteDependence(rd);
+    }
 
     break;
 
@@ -65,36 +68,32 @@ void DependencyChecker::checkForReadDependence(unsigned int reg)
    * instruction.  If so, adds an entry to the list of dependences. Also updates
    * the appropriate RegisterInfo entry regardless of dependence detection.
    */
-{ //check for the read dependence occur when reg is read
+{ 
    if(reg >= 0 && reg < NumRegisters){
-   int i = myInstructions.size();               
-	     if(myCurrentState[reg].accessType == WRITE)
+       int i = myInstructions.size();               
+	     if(myCurrentState[reg].accessType == WRITE) {
                  addDependEntry(reg, RAW);
-      
-
+       }
    
    //update the RegisterInfo entry              
    RegisterInfo updateInfo;
    updateInfo.lastInstructionToAccess = i;
    updateInfo.accessType = READ;
    myCurrentState.at(reg) = updateInfo;
-}
- }     
+   }
+}     
        
 
-
 void DependencyChecker::addDependEntry(unsigned int reg, DependenceType type)
-{// iterate the list of registers that dependence involoved
+//helper method to add an entry to the list of dependences
+{
     Dependence dep;
     dep.dependenceType = type;
     dep.registerNumber = reg;
     dep.previousInstructionNumber = myCurrentState.at(reg).lastInstructionToAccess;
     dep.currentInstructionNumber = myInstructions.size() ;
     myDependences.push_back(dep);
-
 }
-
-
 
 
 
@@ -103,21 +102,24 @@ void DependencyChecker::checkForWriteDependence(unsigned int reg)
    * instruction.  If so, adds an entry to the list of dependences. Also updates 
    * the appropriate RegisterInfo entry regardless of dependence detection.
    */
-   {
+{
    if(reg >= 0 && reg < NumRegisters){
       int i = myInstructions.size();
-   if(myCurrentState[reg].accessType == WRITE)
-       addDependEntry(reg,WAW);
-   if(myCurrentState[reg].accessType == READ)
-       addDependEntry(reg,WAR);
+      if(myCurrentState[reg].accessType == WRITE) {
+         addDependEntry(reg,WAW);
+      }
+      if(myCurrentState[reg].accessType == READ) {
+         addDependEntry(reg,WAR);
+      }
    
-    RegisterInfo updateInfo;
-    updateInfo.lastInstructionToAccess = i;
-    updateInfo.accessType = WRITE;
-    myCurrentState.at(reg) = updateInfo;
-  
+      RegisterInfo updateInfo;
+      updateInfo.lastInstructionToAccess = i;
+      updateInfo.accessType = WRITE;
+      myCurrentState.at(reg) = updateInfo;
   }
 }
+
+
 void DependencyChecker::printDependences()
   /* Prints out the sequence of instructions followed by the sequence of data
    * dependencies.
